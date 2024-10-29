@@ -7,36 +7,37 @@ function productToTag(p) {
   return `<li>${p.name} | ${p.price} рублей | ${p.description} | ${p.price}</li>`;
 }
 
-function loadProducts() {
+async function loadProducts() {
   statusElement.innerText = "Загрузка...";
 
-  fetch("http://localhost:8000/products")
-    .then((r) => r.json())
-    .then((j) => j.map(productToTag).join("\n"))
-    .then((p) => {
-      statusElement.innerText = "Загружено!";
-      listElement.innerHTML = p;
-    });
+  const res = await fetch("http://localhost:8000/products").then((r) =>
+    r.json(),
+  );
+  const products = res.map(productToTag).join("\n");
+
+  statusElement.innerText = "Загружено!";
+  listElement.innerHTML = products;
 }
 
 loadProducts();
 
 const addButton = document.getElementById("addbtn");
-addButton.addEventListener("click", () => {
+addButton.addEventListener("click", async () => {
   const name = prompt("Введите название");
   const price = parseInt(prompt("Введите цену"));
   const description = prompt("Введите описание");
   const article = prompt("Введите артикул");
 
   statusElement.innerText = "Отправляем товар...";
-  fetch("http://localhost:8000/products", {
+
+  await fetch("http://localhost:8000/products", {
     method: "POST",
     headers: {
       "Content-Type": "application/json;charset=utf-8",
     },
     body: JSON.stringify({ name, price, description, article }),
-  }).then(() => {
-    statusElement.innerText = "Товар отправлен!";
-    setTimeout(loadProducts, 1000);
   });
+
+  statusElement.innerText = "Товар отправлен!";
+  setTimeout(loadProducts, 1000);
 });
